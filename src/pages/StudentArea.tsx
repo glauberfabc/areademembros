@@ -110,6 +110,10 @@ export default function StudentArea() {
     if (url.includes('vimeo.com/')) {
       return url.replace('vimeo.com/', 'player.vimeo.com/video/');
     }
+    if (url.includes('wistia.com/medias/')) {
+      const videoId = url.split('wistia.com/medias/')[1]?.split('?')[0];
+      return `https://fast.wistia.net/embed/iframe/${videoId}`;
+    }
     return url;
   };
 
