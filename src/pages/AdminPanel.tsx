@@ -18,6 +18,7 @@ export default function AdminPanel() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [modulesList, setModulesList] = useState<any[]>([]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -162,6 +163,7 @@ export default function AdminPanel() {
     setPdfUrl(lesson.pdf_url || null);
     setPdfFile(null);
     setActiveTab('dashboard');
+    setIsSidebarOpen(false);
   };
 
   const handleCancelEdit = () => {
@@ -207,41 +209,54 @@ export default function AdminPanel() {
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
-      <div className="flex min-h-screen">
-        <aside className="w-64 border-r border-primary/10 bg-white dark:bg-zinc-900 flex flex-col fixed h-full">
-          <div className="p-6 flex items-center gap-3">
-            <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white">
-              <span className="material-symbols-outlined">egg_alt</span>
+      <div className="flex h-screen overflow-hidden">
+        {/* Overlay para mobile */}
+        {isSidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-sm"
+            onClick={() => setIsSidebarOpen(false)}
+          ></div>
+        )}
+
+        <aside className={`fixed inset-y-0 left-0 w-64 lg:relative z-50 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-primary/10 bg-white dark:bg-zinc-900 flex flex-col h-full shadow-2xl lg:shadow-none`}>
+          <div className="p-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="size-10 rounded-full bg-primary flex items-center justify-center text-white">
+                <span className="material-symbols-outlined">egg_alt</span>
+              </div>
+              <div>
+                <h1 className="text-sm font-bold leading-tight">Easter Egg</h1>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Admin Panel</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-sm font-bold leading-tight">Easter Egg</h1>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Admin Panel</p>
-            </div>
+            <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-slate-400">
+              <span className="material-symbols-outlined">close</span>
+            </button>
           </div>
           <nav className="flex-1 px-4 space-y-1">
             <button
-              onClick={() => setActiveTab('dashboard')}
+              onClick={() => { setActiveTab('dashboard'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
             >
               <span className="material-symbols-outlined text-[20px]">dashboard</span>
               Dashboard
             </button>
             <button
-              onClick={() => setActiveTab('lessons')}
+              onClick={() => { setActiveTab('lessons'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${activeTab === 'lessons' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
             >
               <span className="material-symbols-outlined text-[20px]">play_circle</span>
               Aulas
             </button>
             <button
-              onClick={() => setActiveTab('modules')}
+              onClick={() => { setActiveTab('modules'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${activeTab === 'modules' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
             >
               <span className="material-symbols-outlined text-[20px]">view_module</span>
               Módulos
             </button>
             <button
-              onClick={() => setActiveTab('students')}
+              onClick={() => { setActiveTab('students'); setIsSidebarOpen(false); }}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${activeTab === 'students' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
             >
               <span className="material-symbols-outlined text-[20px]">group</span>
@@ -255,16 +270,22 @@ export default function AdminPanel() {
             </Link>
           </div>
         </aside>
-        <main className="flex-1 ml-64 p-8">
-          <header className="flex justify-between items-center mb-8">
-            <div>
-              <h2 className="text-2xl font-bold">
-                {activeTab === 'dashboard' && 'Visão Geral'}
-                {activeTab === 'lessons' && 'Gerenciar Aulas'}
-                {activeTab === 'modules' && 'Gerenciar Módulos'}
-                {activeTab === 'students' && 'Gerenciar Alunos'}
-              </h2>
-              <p className="text-slate-500 dark:text-slate-400">Bem-vindo ao painel administrativo.</p>
+
+        <main className="flex-1 overflow-y-auto p-4 lg:p-8 w-full">
+          <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-slate-600 dark:text-slate-300">
+                <span className="material-symbols-outlined">menu</span>
+              </button>
+              <div>
+                <h2 className="text-xl lg:text-2xl font-bold">
+                  {activeTab === 'dashboard' && 'Visão Geral'}
+                  {activeTab === 'lessons' && 'Gerenciar Aulas'}
+                  {activeTab === 'modules' && 'Gerenciar Módulos'}
+                  {activeTab === 'students' && 'Gerenciar Alunos'}
+                </h2>
+                <p className="hidden xs:block text-xs lg:text-sm text-slate-500 dark:text-slate-400">Bem-vindo ao painel administrativo.</p>
+              </div>
             </div>
             {activeTab === 'lessons' && (
               <button
@@ -272,7 +293,7 @@ export default function AdminPanel() {
                   handleCancelEdit();
                   setActiveTab('dashboard');
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg font-semibold hover:bg-primary/90 transition-all"
               >
                 <span className="material-symbols-outlined text-sm">add</span>
                 Nova Aula
@@ -282,22 +303,22 @@ export default function AdminPanel() {
 
           {activeTab === 'dashboard' && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-10">
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
                   <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Total de Alunos</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.students}</h3>
+                  <h3 className="text-2xl lg:text-3xl font-bold mt-1">{stats.students}</h3>
                 </div>
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
                   <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Aulas Publicadas</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.lessons}</h3>
+                  <h3 className="text-2xl lg:text-3xl font-bold mt-1">{stats.lessons}</h3>
                 </div>
                 <div className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
                   <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Módulos</p>
-                  <h3 className="text-3xl font-bold mt-1">{stats.modules}</h3>
+                  <h3 className="text-2xl lg:text-3xl font-bold mt-1">{stats.modules}</h3>
                 </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <section className="bg-white dark:bg-zinc-900 p-6 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                <section className="bg-white dark:bg-zinc-900 p-5 lg:p-6 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm">
                   <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">
                       {editingLessonId ? 'edit' : 'video_call'}
@@ -308,7 +329,7 @@ export default function AdminPanel() {
                     <div>
                       <label className="block text-sm font-medium mb-1">Módulo</label>
                       <select
-                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent"
+                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent text-sm"
                         value={selectedModule}
                         onChange={(e) => setSelectedModule(e.target.value)}
                         required
@@ -320,7 +341,7 @@ export default function AdminPanel() {
                     <div>
                       <label className="block text-sm font-medium mb-1">Título da Aula</label>
                       <input
-                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent"
+                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent text-sm"
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
@@ -330,7 +351,7 @@ export default function AdminPanel() {
                     <div>
                       <label className="block text-sm font-medium mb-1">URL do Vídeo</label>
                       <input
-                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent"
+                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent text-sm"
                         type="url"
                         value={videoUrl}
                         onChange={(e) => setVideoUrl(e.target.value)}
@@ -340,7 +361,7 @@ export default function AdminPanel() {
                     <div>
                       <label className="block text-sm font-medium mb-1">Descrição</label>
                       <textarea
-                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent"
+                        className="w-full rounded-lg border-slate-200 dark:border-zinc-700 bg-transparent text-sm"
                         rows={4}
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
@@ -349,37 +370,37 @@ export default function AdminPanel() {
                     <div>
                       <label className="block text-sm font-medium mb-1">Material de Apoio (PDF)</label>
                       <div className="flex flex-col gap-2">
-                        <div className="flex items-center gap-4 p-4 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-800/20">
-                          <div className="flex-1">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 border-2 border-dashed border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50/50 dark:bg-zinc-800/20">
+                          <div className="flex-1 w-full overflow-hidden">
                             {pdfFile ? (
                               <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined text-rose-500">picture_as_pdf</span>
                                 <div className="flex flex-col min-w-0">
-                                  <span className="text-sm font-medium truncate">{pdfFile.name}</span>
+                                  <span className="text-xs font-medium truncate">{pdfFile.name}</span>
                                   <span className="text-[10px] text-slate-500">{(pdfFile.size / (1024 * 1024)).toFixed(2)} MB</span>
                                 </div>
                                 <button
                                   type="button"
                                   onClick={() => setPdfFile(null)}
-                                  className="text-xs text-red-500 font-bold hover:underline ml-auto"
+                                  className="text-[10px] text-red-500 font-bold hover:underline ml-auto"
                                 >Remover</button>
                               </div>
                             ) : pdfUrl ? (
                               <div className="flex items-center gap-2">
                                 <span className="material-symbols-outlined text-green-500">check_circle</span>
-                                <span className="text-sm font-medium">PDF já carregado</span>
+                                <span className="text-xs font-medium">PDF já carregado</span>
                                 <a
                                   href={pdfUrl}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-xs text-primary font-bold hover:underline"
+                                  className="text-[10px] text-primary font-bold hover:underline"
                                 >Ver arquivo</a>
                               </div>
                             ) : (
-                              <p className="text-xs text-slate-500">Selecione um arquivo PDF para esta aula</p>
+                              <p className="text-[10px] lg:text-xs text-slate-500">Selecione um PDF</p>
                             )}
                           </div>
-                          <label className="cursor-pointer bg-white dark:bg-zinc-800 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-zinc-700 shadow-sm hover:bg-slate-50 transition-colors shrink-0">
+                          <label className="w-full sm:w-auto cursor-pointer bg-white dark:bg-zinc-800 px-3 py-1.5 rounded-lg text-xs font-bold border border-slate-200 dark:border-zinc-700 shadow-sm hover:bg-slate-50 transition-colors text-center shrink-0">
                             {pdfUrl || pdfFile ? 'Alterar' : 'Escolher PDF'}
                             <input
                               type="file"
@@ -396,21 +417,21 @@ export default function AdminPanel() {
                             />
                           </label>
                         </div>
-                        <p className="text-[10px] text-slate-400 italic px-1">Limite máximo: 100MB</p>
+                        <p className="text-[9px] text-slate-400 italic px-1">Limite: 100MB</p>
                       </div>
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
                       {editingLessonId && (
                         <button
                           type="button"
                           onClick={handleCancelEdit}
-                          className="flex-1 py-3 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 rounded-lg font-bold hover:bg-slate-200 transition-colors"
+                          className="w-full sm:flex-1 py-3 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 rounded-lg font-bold hover:bg-slate-200 transition-colors text-sm"
                         >
                           Cancelar
                         </button>
                       )}
                       <button
-                        className="flex-[2] py-3 bg-primary text-white rounded-lg font-bold disabled:opacity-50"
+                        className={`w-full ${editingLessonId ? 'sm:flex-[2]' : 'w-full'} py-3 bg-primary text-white rounded-lg font-bold disabled:opacity-50 transition-all text-sm`}
                         type="submit"
                         disabled={loading}
                       >
@@ -423,134 +444,98 @@ export default function AdminPanel() {
             </>
           )}
 
-          {activeTab === 'lessons' && (
+          {(activeTab === 'lessons' || activeTab === 'modules' || activeTab === 'students') && (
             <section className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left border-collapse min-w-[600px]">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-zinc-800/50">
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Aula</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Módulo</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Data</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
+                      <th className="px-4 lg:px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        {activeTab === 'lessons' && 'Aula'}
+                        {activeTab === 'modules' && 'Módulo'}
+                        {activeTab === 'students' && 'Aluno'}
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        {activeTab === 'lessons' && 'Módulo'}
+                        {activeTab === 'modules' && 'Ordem'}
+                        {activeTab === 'students' && 'Papel'}
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        {activeTab === 'lessons' && 'Data'}
+                        {activeTab === 'modules' && 'Status'}
+                        {activeTab === 'students' && 'Cadastro'}
+                      </th>
+                      <th className="px-4 lg:px-6 py-3 text-[10px] font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                    {lessonsList.map((lesson) => (
+                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800 text-sm">
+                    {activeTab === 'lessons' && lessonsList.map((lesson) => (
                       <tr key={lesson.id} className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="px-6 py-4">
-                          <span className="font-medium text-sm">{lesson.title}</span>
-                          <p className="text-xs text-slate-400 truncate max-w-[200px]">{lesson.video_url}</p>
+                        <td className="px-4 lg:px-6 py-4">
+                          <span className="font-medium text-xs lg:text-sm block">{lesson.title}</span>
+                          <span className="text-[10px] text-slate-400 block truncate max-w-[150px] lg:max-w-xs">{lesson.video_url}</span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-500 font-medium">
+                        <td className="px-4 lg:px-6 py-4 text-xs lg:text-sm text-slate-500 font-medium">
                           {lesson.modules?.title}
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-400">
+                        <td className="px-4 lg:px-6 py-4 text-[10px] lg:text-xs text-slate-400">
                           {new Date(lesson.created_at).toLocaleDateString('pt-BR')}
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => handleEditClick(lesson)}
-                              className="p-2 text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                              title="Editar Aula"
-                            >
+                        <td className="px-4 lg:px-6 py-4 text-right">
+                          <div className="flex justify-end gap-1 lg:gap-2">
+                            <button onClick={() => handleEditClick(lesson)} className="p-1.5 text-primary hover:bg-primary/5 rounded-lg transition-colors">
                               <span className="material-symbols-outlined text-sm">edit</span>
                             </button>
-                            <button
-                              onClick={() => handleDeleteLesson(lesson.id)}
-                              className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors"
-                              title="Excluir Aula"
-                            >
+                            <button onClick={() => handleDeleteLesson(lesson.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                               <span className="material-symbols-outlined text-sm">delete</span>
                             </button>
                           </div>
                         </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
 
-          {activeTab === 'modules' && (
-            <section className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-zinc-800/50">
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Módulo</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Ordem</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                    {modulesList.map((module) => (
+                    {activeTab === 'modules' && modulesList.map((module) => (
                       <tr key={module.id} className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="px-6 py-4 flex items-center gap-3">
-                          <div className="size-8 rounded bg-slate-100 overflow-hidden flex-shrink-0">
-                            {module.image_url && <img src={module.image_url} alt="" className="w-full h-full object-cover" />}
+                        <td className="px-4 lg:px-6 py-4">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="size-8 rounded bg-slate-100 overflow-hidden shrink-0">
+                              {module.image_url && <img src={module.image_url} alt="" className="w-full h-full object-cover" />}
+                            </div>
+                            <span className="font-medium text-xs lg:text-sm truncate">{module.title}</span>
                           </div>
-                          <span className="font-medium text-sm">{module.title}</span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-500">
+                        <td className="px-4 lg:px-6 py-4 text-xs lg:text-sm text-slate-500 font-medium">
                           {module.order_index}
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${module.is_locked ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                        <td className="px-4 lg:px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase ${module.is_locked ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
                             {module.is_locked ? 'Bloqueado' : 'Desbloqueado'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleToggleModuleLock(module.id, module.is_locked)}
-                            className={`text-xs font-bold hover:underline ${module.is_locked ? 'text-emerald-600' : 'text-amber-600'}`}
-                          >
+                        <td className="px-4 lg:px-6 py-4 text-right">
+                          <button onClick={() => handleToggleModuleLock(module.id, module.is_locked)} className={`text-[10px] font-bold hover:underline ${module.is_locked ? 'text-emerald-600' : 'text-amber-600'}`}>
                             {module.is_locked ? 'Desbloquear' : 'Bloquear'}
                           </button>
                         </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
 
-          {activeTab === 'students' && (
-            <section className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-slate-50 dark:bg-zinc-800/50">
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Aluno</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Papel</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Cadastro</th>
-                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
-                    {studentsList.map((student) => (
+                    {activeTab === 'students' && studentsList.map((student) => (
                       <tr key={student.id} className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-                        <td className="px-6 py-4">
-                          <span className="font-medium text-sm">{student.full_name || 'Usuário Sem Nome'}</span>
-                          <p className="text-xs text-slate-400 italic">{student.id.substring(0, 8)}...</p>
+                        <td className="px-4 lg:px-6 py-4">
+                          <span className="font-medium text-xs lg:text-sm block">{student.full_name || 'Usuário Sem Nome'}</span>
+                          <span className="text-[10px] text-slate-400 italic">ID: {student.id.substring(0, 8)}</span>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${student.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                        <td className="px-4 lg:px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-[9px] font-bold uppercase ${student.role === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
                             {student.role}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-sm text-slate-400">
+                        <td className="px-4 lg:px-6 py-4 text-[10px] lg:text-xs text-slate-400">
                           {new Date(student.created_at).toLocaleDateString('pt-BR')}
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleToggleRole(student.id, student.role)}
-                            className="text-xs font-bold text-primary hover:underline"
-                          >
+                        <td className="px-4 lg:px-6 py-4 text-right">
+                          <button onClick={() => handleToggleRole(student.id, student.role)} className="text-[10px] font-bold text-primary hover:underline">
                             Alternar Role
                           </button>
                         </td>
