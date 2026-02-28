@@ -181,15 +181,35 @@ export default function StudentArea() {
 
           <div className="p-8 max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              {/* Player de Vídeo */}
-              <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/5">
+              {/* Player de Vídeo ou Link de Material */}
+              <div className="aspect-video bg-black/5 dark:bg-black/20 rounded-xl overflow-hidden shadow-2xl ring-1 ring-white/5 flex items-center justify-center">
                 {activeLesson?.video_url ? (
-                  <iframe
-                    src={getEmbedUrl(activeLesson.video_url)}
-                    className="w-full h-full"
-                    allowFullScreen
-                    title={activeLesson.title}
-                  ></iframe>
+                  activeLesson.video_url.match(/drive\.google\.com|docs\.google\.com/) ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-10 text-center bg-gradient-to-br from-primary/5 to-primary/20 backdrop-blur-sm">
+                      <div className="size-20 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6 animate-pulse">
+                        <span className="material-symbols-outlined text-5xl">folder_zip</span>
+                      </div>
+                      <h4 className="text-xl font-black mb-3 text-slate-900 dark:text-white uppercase tracking-tight">Material Disponível para Download</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 mb-8 max-w-sm">Esta aula contém materiais externos. Clique no botão abaixo para acessar os arquivos no Google Drive.</p>
+                      <a
+                        href={activeLesson.video_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-2xl font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-all group"
+                      >
+                        <span className="material-symbols-outlined">open_in_new</span>
+                        Acessar no Google Drive
+                        <span className="material-symbols-outlined text-xs opacity-50 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                      </a>
+                    </div>
+                  ) : (
+                    <iframe
+                      src={getEmbedUrl(activeLesson.video_url)}
+                      className="w-full h-full"
+                      allowFullScreen
+                      title={activeLesson.title}
+                    ></iframe>
+                  )
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center text-stone-500">
                     <span className="material-symbols-outlined text-6xl mb-4">play_circle</span>
@@ -200,28 +220,48 @@ export default function StudentArea() {
 
               {/* Informações da Aula */}
               {activeLesson && (
-                <div className="bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-200 dark:border-stone-800">
-                  <h3 className="text-2xl font-bold mb-4">{activeLesson.title}</h3>
+                <div className="bg-white dark:bg-stone-900 p-8 rounded-xl border border-stone-200 dark:border-stone-800 shadow-sm transition-all hover:shadow-md">
+                  <div className="flex items-start justify-between mb-4">
+                    <h3 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
+                      {activeLesson.title}
+                    </h3>
+                  </div>
                   <div className="prose dark:prose-invert max-w-none text-stone-600 dark:text-stone-400">
-                    <p>{activeLesson.description || 'Sem descrição disponível para esta aula.'}</p>
+                    <p className="leading-relaxed">{activeLesson.description || 'Sem descrição disponível para esta aula.'}</p>
                   </div>
 
-                  {activeLesson.pdf_url && (
-                    <div className="mt-8 pt-8 border-t border-stone-100 dark:border-stone-800">
-                      <h4 className="text-sm font-bold uppercase tracking-wider mb-4 flex items-center gap-2 text-stone-800 dark:text-stone-100">
-                        <span className="material-symbols-outlined text-primary">download_for_offline</span>
-                        Materiais de Apoio
+                  {(activeLesson.pdf_url || (activeLesson.video_url && activeLesson.video_url.match(/drive\.google\.com|docs\.google\.com/))) && (
+                    <div className="mt-10 pt-8 border-t border-stone-100 dark:border-stone-800">
+                      <h4 className="text-sm font-black uppercase tracking-widest mb-6 flex items-center gap-2 text-primary">
+                        <span className="material-symbols-outlined text-xl">cloud_download</span>
+                        Materiais e Downloads
                       </h4>
-                      <a
-                        href={activeLesson.pdf_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-3 px-6 py-3 bg-stone-100 dark:bg-stone-800 hover:bg-primary hover:text-white rounded-xl text-sm font-bold transition-all group"
-                      >
-                        <span className="material-symbols-outlined text-rose-500 group-hover:text-white">picture_as_pdf</span>
-                        Baixar Guia PDF da Aula
-                        <span className="material-symbols-outlined text-xs opacity-50 group-hover:opacity-100">open_in_new</span>
-                      </a>
+                      <div className="flex flex-wrap gap-4">
+                        {activeLesson.pdf_url && (
+                          <a
+                            href={activeLesson.pdf_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-3 px-6 py-4 bg-stone-50 dark:bg-stone-800/50 hover:bg-rose-500 hover:text-white rounded-2xl text-sm font-bold transition-all border border-stone-100 dark:border-stone-800 group shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-rose-500 group-hover:text-white">picture_as_pdf</span>
+                            Guia PDF da Aula
+                            <span className="material-symbols-outlined text-[10px] opacity-30 group-hover:opacity-100">launch</span>
+                          </a>
+                        )}
+                        {activeLesson.video_url && activeLesson.video_url.match(/drive\.google\.com|docs\.google\.com/) && (
+                          <a
+                            href={activeLesson.video_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-3 px-6 py-4 bg-primary/5 hover:bg-primary hover:text-white rounded-2xl text-sm font-bold transition-all border border-primary/10 group shadow-sm"
+                          >
+                            <span className="material-symbols-outlined text-primary group-hover:text-white">folder_shared</span>
+                            Link Direto (Drive)
+                            <span className="material-symbols-outlined text-[10px] opacity-30 group-hover:opacity-100">launch</span>
+                          </a>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

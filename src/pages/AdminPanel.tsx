@@ -12,11 +12,12 @@ export default function AdminPanel() {
   const [stats, setStats] = useState({ students: 0, lessons: 0, modules: 0 });
   const [lessonsList, setLessonsList] = useState<any[]>([]);
   const [studentsList, setStudentsList] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'lessons' | 'students'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'lessons' | 'students' | 'modules'>('dashboard');
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [modulesList, setModulesList] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,12 +41,15 @@ export default function AdminPanel() {
   }
 
   async function fetchInitialData() {
-    // Buscar módulos para o select
+    // Buscar módulos para o select e para a lista
     const { data: modulesData } = await supabase
       .from('modules')
-      .select('id, title')
+      .select('*')
       .order('order_index');
-    if (modulesData) setModules(modulesData);
+    if (modulesData) {
+      setModules(modulesData);
+      setModulesList(modulesData);
+    }
 
     // Buscar lista completa de aulas
     const { data: lessonsData } = await supabase
@@ -191,6 +195,16 @@ export default function AdminPanel() {
     else fetchInitialData();
   };
 
+  const handleToggleModuleLock = async (moduleId: string, currentStatus: boolean) => {
+    const { error } = await supabase
+      .from('modules')
+      .update({ is_locked: !currentStatus })
+      .eq('id', moduleId);
+
+    if (error) alert('Erro ao atualizar módulo: ' + error.message);
+    else fetchInitialData();
+  };
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
       <div className="flex min-h-screen">
@@ -220,6 +234,13 @@ export default function AdminPanel() {
               Aulas
             </button>
             <button
+              onClick={() => setActiveTab('modules')}
+              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${activeTab === 'modules' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
+            >
+              <span className="material-symbols-outlined text-[20px]">view_module</span>
+              Módulos
+            </button>
+            <button
               onClick={() => setActiveTab('students')}
               className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors ${activeTab === 'students' ? 'bg-primary/10 text-primary' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800'}`}
             >
@@ -240,6 +261,7 @@ export default function AdminPanel() {
               <h2 className="text-2xl font-bold">
                 {activeTab === 'dashboard' && 'Visão Geral'}
                 {activeTab === 'lessons' && 'Gerenciar Aulas'}
+                {activeTab === 'modules' && 'Gerenciar Módulos'}
                 {activeTab === 'students' && 'Gerenciar Alunos'}
               </h2>
               <p className="text-slate-500 dark:text-slate-400">Bem-vindo ao painel administrativo.</p>
@@ -443,6 +465,51 @@ export default function AdminPanel() {
                               <span className="material-symbols-outlined text-sm">delete</span>
                             </button>
                           </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
+
+          {activeTab === 'modules' && (
+            <section className="bg-white dark:bg-zinc-900 rounded-xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-zinc-800/50">
+                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Módulo</th>
+                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Ordem</th>
+                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
+                      <th className="px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider text-right">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-zinc-800">
+                    {modulesList.map((module) => (
+                      <tr key={module.id} className="hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
+                        <td className="px-6 py-4 flex items-center gap-3">
+                          <div className="size-8 rounded bg-slate-100 overflow-hidden flex-shrink-0">
+                            {module.image_url && <img src={module.image_url} alt="" className="w-full h-full object-cover" />}
+                          </div>
+                          <span className="font-medium text-sm">{module.title}</span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-slate-500">
+                          {module.order_index}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${module.is_locked ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                            {module.is_locked ? 'Bloqueado' : 'Desbloqueado'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleToggleModuleLock(module.id, module.is_locked)}
+                            className={`text-xs font-bold hover:underline ${module.is_locked ? 'text-emerald-600' : 'text-amber-600'}`}
+                          >
+                            {module.is_locked ? 'Desbloquear' : 'Bloquear'}
+                          </button>
                         </td>
                       </tr>
                     ))}
